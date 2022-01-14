@@ -1,0 +1,519 @@
+syntax = "proto3";
+package openplatform_chameleon_proto;
+option go_package = "whgo/openplatform/proto/openplatform_chameleon;openplatform_chameleon_proto";
+
+service MiddleWareService {
+    // 创建中间件
+    rpc Create(CreateMiddleWareReq) returns (Empty);
+    // 查询中间件列表
+    rpc GetMiddleWareList(QueryMiddleWareReq) returns(MiddleWareList);
+    // 删除中间件(只传id即可)
+    rpc Delete(MiddleWare) returns (Empty);
+    // 上传安装包
+    rpc UploadMiddleWarePkg(MiddleWarePackage) returns (Empty);
+    // 查询中间件的所有版本
+    rpc GetMiddleWareVersionList(QueryMiddleWareReq) returns (MiddleWareVersionList);
+    // 更新
+    rpc UpdateMiddleWarePkg(MiddleWarePackage) returns(MiddleWarePackage);
+    // 删除安装包(只传id即可)
+    rpc DeleteVersionPackage(MiddleWarePackage) returns(Empty);
+    // 类型列表
+    rpc GetTypeList(Empty) returns (TypeList);
+}
+
+message QueryMiddleWareReq {
+    int32 offset = 1; // required
+    int32 limit = 2;  // required
+    string name = 3;  // 名称
+    string user_name = 4; // 创建人
+    int32 parent_id = 5; // 查询包版本时需要传入
+    int64 id = 6; // 查看单个版本信息
+}
+
+message MiddleWareList {
+    repeated MiddleWare list = 1;
+    int32 total = 2;
+}
+
+message MiddleWare {
+    string name = 1; // 名称
+    string user_name = 2; // required
+    string user_id = 3; // required
+    int64 update_time = 4;
+    int32 id = 5;
+}
+
+message CreateMiddleWareReq {
+    MiddleWare entity = 1;
+}
+
+message MiddleWareVersionList {
+    repeated MiddleWarePackage list = 1;
+    int32 total = 2;
+    string name = 3;
+}
+
+message MiddleWarePackage {
+    string name = 1; // 名称
+    string version = 2;
+    repeated string meta = 3; // 提取的参数
+    string package = 4; // 压缩包路径
+    string type = 5; // 主备/集群/高可用
+    string marks = 6; //备注
+    int64 id = 7;
+    string user_name = 8; // required
+    string user_id = 9; // required
+    int64 create_time = 10;
+    int64 update_time = 11;
+    int32 parentId = 12; // 中间件id
+    string deployment_type = 13; // 安装包部署类型, 单体(monolith)/集群(cluster)
+}
+
+message TypeList {
+    repeated string list = 1;
+}
+
+// 微服务
+service MicroSrvService {
+    // 创建微服务
+    rpc Create(MicroService) returns (Empty);
+    // 查询微服务
+    rpc GetMicroSrvList(QueryMicroSrvReq) returns (MicroServiceList);
+    // 更新
+    rpc Update(MicroService) returns(MicroService);
+    // 删除
+    rpc Delete(MicroService) returns(Empty);
+    // 获取镜像列表
+    rpc GetImageList(GetImageReq) returns (ImageList);
+}
+
+message GetImageReq {
+    string srv_name = 1; // required, 镜像名称
+}
+
+message ImageList {
+    repeated string list = 1;
+}
+
+message QueryMicroSrvReq {
+    int32 offset = 1;
+    int32 limit = 2;
+    string name = 3;
+    string user_name = 4;
+    int64 id = 5; // 查看单个服务信息
+}
+
+message MicroService {
+    string name = 1; // 名称
+    string image = 2; // 镜像地址
+    map<string,string> pub = 8; // 公参, key 为用户自定义(用于微服务配置参数), value 是前端从亚当上获取
+    map<string,string> meta = 3; // 自定义参数
+    int64 id = 4;
+    string user_name = 5; //
+    string user_id = 6;
+    int64 update_time = 7;
+    string version = 9;
+    repeated Port ports = 10;
+    repeated Volume volumes = 11;
+}
+
+// 端口映射
+message Port {
+    string name = 1; // 端口名称
+    int32 container_port = 2; // 容器端口
+    enum ProtocolType {
+        Unknown = 0;
+        TCP = 1;
+        UDP = 2;
+    }
+    ProtocolType protocol = 3; // 协议
+    enum KindType {
+        UnknownKind = 0;
+        NodePort = 1;  // 所有主机端口
+        HostPort = 2;  // Pod 主机端口
+        ClusterIP = 3;  // 集群 IP，集群内部访问，只是起声明作用
+        LoadBalancer = 4; // L4 负载均衡
+    }
+    KindType kind = 4; // 网络模式
+    // source_port 是主机监听端口, kind 为 NodePort 时为空表示端口随机, kind 为 ClusterIP 时为空表示与容器端口相同
+    int32 source_port = 5;
+}
+
+message VolumeMount {
+    string mount_path = 1; // 容器路径
+    bool read_only = 2; // 是否只读
+    string sub_path = 3; // 子路径(仅适用于数据卷挂载，不适用于主机路径映射), 只挂载卷中的某一个文件
+}
+
+// 数据卷，目前只支持配置映射卷
+message Volume {
+    string name = 1; // volume name
+    message ConfigMap {
+        string name = 1; // 配置映射名称, 实际使用中需要先创建和微服务 namespace 一样的 configMap
+        string default_mode = 2; // Default Mode，文件的默认权限
+        bool optional = 3; // optional 为 true 时，即使引用的 ConfigMap 不存在时，也可以启动容器
+        message Item { // 选择 configMap 中特定的键
+             string key = 1;
+             string path = 2;
+             string mode = 3;
+        }
+       repeated Item items = 4; // 只选择 configMap 中某些 key 时，需要有
+    }
+    ConfigMap configMap = 2;
+    repeated VolumeMount volume_mount = 3;
+}
+
+message MicroServiceList {
+    repeated MicroService list = 1;
+    int32 total = 2;
+}
+
+// 证书
+service CertService {
+    // 创建
+    rpc Create(Cert) returns(Empty);
+    // 查询
+    rpc GetCertList(QueryCertReq) returns(CertList);
+    // 更新
+    rpc Update(Cert) returns(Cert);
+    // 删除
+    rpc Delete(Cert) returns(Empty);
+}
+
+message QueryCertReq {
+    int32 offset = 1;
+    int32 limit = 2;
+    string name = 3;
+    string user_name =4;
+    int64 id = 5; // 查看单个信息
+}
+
+message CertList {
+    repeated Cert list = 1;
+    int32 total = 2;
+}
+
+message Cert {
+    string name = 1; // 名称
+    string signer = 2; // 签发人
+    int64 expire_date = 3; // 过期时间
+    string user_name = 4; // 创建人
+    string user_id = 5;
+    int64 id = 6;
+    repeated string IP = 7;
+    repeated string host = 8; //域名
+    string private_key = 9; // 私钥
+    string content = 10; // 证书
+    int64 update_time = 11;
+}
+
+// 部署任务
+service PackTaskService {
+    // 创建任务(只必填参数)
+    rpc Create(CreatePackTaskReq) returns(Empty);
+    // 查询
+    rpc GetTaskList(QueryPackTaskList) returns(PackTaskList);
+    // 任务详情, 包括任务必填参数，以及微服务、中间件、负载均衡、证书、公共环境变量key-value
+    rpc GetTaskDetail(TaskDetailReq) returns(PackTask);
+    // 更新
+    rpc Update(CreatePackTaskReq) returns (Empty);
+    // 删除
+    rpc Delete(DeleteTaskReq) returns (Empty);
+    // 打包
+    rpc Build(BuildTaskReq) returns(Empty);
+    // 终止
+    rpc Stop(BuildTaskReq) returns(Empty);
+    // clone
+    rpc Clone(CloneTaskReq) returns (Empty);
+    // 任务相关微服务
+    rpc CreateTaskMicroSrv(TaskMicroSrv) returns (TaskMicroSrv);
+    rpc UpdateTaskMicroSrv(TaskMicroSrv) returns (Empty);
+    rpc DeleteTaskMicroSrv(TaskMicroSrv) returns (Empty);
+    rpc GetTaskMicroSrv(QueryRequest) returns (TaskMicroSrvList);
+    // 获取任务相关微服务的所有公共环境变量名称
+    rpc GetPublicVarName(QueryRequest) returns (GetPublicVarNameResponse);
+    // 任务相关负载均衡
+    rpc CreateTaskSlb(TaskSlb) returns (TaskSlb);
+    rpc UpdateTaskSlb(TaskSlb) returns (Empty);
+    rpc DeleteTaskSlb(TaskSlb) returns (Empty);
+    rpc GetTaskSlb(QueryRequest) returns (TaskSlbList);
+    // 任务相关中间件
+    rpc CreateTaskMiddleware(TaskMiddleWare) returns (TaskMiddleWare);
+    rpc UpdateTaskMiddleware(TaskMiddleWare) returns (Empty);
+    rpc DeleteTaskMiddleware(TaskMiddleWare) returns (Empty);
+    rpc GetTaskMiddleware(QueryRequest) returns (TaskMiddlewareList);
+    // 任务相关证书
+    rpc CreateTaskCert(TaskCert) returns (TaskCert);
+    rpc DeleteTaskCert(TaskCert) returns (Empty);
+    rpc GetTaskCert(TaskCert) returns (TaskCertList);
+}
+
+message QueryRequest {
+    int64 id = 1; // 两个条件不能同时为空
+    string task_id = 2; // 两个条件不能同时为空
+}
+
+message TaskMicroSrvList{
+    repeated TaskMicroSrv list = 1;
+    int32 total = 2;
+}
+
+message TaskMiddlewareList{
+    repeated TaskMiddleWare list = 1;
+    int32 total = 2;
+}
+
+message TaskSlbList{
+    repeated TaskSlb list = 1;
+    int32 total = 2;
+}
+message TaskCertList {
+    repeated TaskCert list = 1;
+    int32 total = 2;
+}
+message BuildTaskReq {
+    string task_id = 1;
+    int64 id = 2;
+}
+
+message CloneTaskReq {
+    string task_id = 1;
+    int64 id = 2;
+    string user_name = 3; // 创建人
+    string user_id = 4;
+}
+
+message TaskConfigMap {
+    string name = 1;
+    string namespace = 2;
+    map<string, string> data = 3;
+}
+
+// 任务的必填参数,只有当用户点击创建任务的确定按钮后, 会调用创建任务方法
+// 前端在添加证书、中间件、微服务、服务均衡时，会随机生成任务 ID，然后创建这些非必选项，等用户填完必填项
+// 调用创建任务接口，并指定之前的任务 ID
+message CreatePackTaskReq {
+    string task_name = 1; // 任务名称
+    string user_name = 2; // 创建人
+    string user_id = 3;
+    TaskStatus status = 4; // 任务状态: 未打包、已打包、成功、
+    // repeated int32 certs =5;
+    RancherInfo rancher = 6;
+    map<string,MirrorStore> mirrors = 7; // 镜像的序号 => 镜像仓库信息
+    map<string,string> pub_params = 8; // 公参配置
+    repeated string namespaces = 9; // 命名空间
+    string pro_name = 10; // 项目名称
+    string cluster_name = 11; // 集群名称
+    string task_id = 12; // task uuid
+    int64 id = 13; // task database Id
+    repeated TaskConfigMap configMaps = 14; // 任务修改的 configMap
+}
+
+message QueryPackTaskList{
+    int32 offset = 1;
+    int32 limit = 2;
+    string task_name = 3;
+    string user_name =4;
+    TaskStatus status = 5;
+}
+
+message TaskDetailReq {
+    int64 id = 1;
+    string task_id = 2;
+}
+
+message PackTaskList {
+    repeated SimpleTask list =1 ;
+    int32 total = 2;
+}
+
+message DeleteTaskReq {
+    int64 id = 1;
+    string task_id = 2;
+}
+
+message SimpleTask {
+    string task_name = 1;
+    string user_name = 2;
+    TaskStatus status = 3;  // 1未打包，2已打包？，3失败，4成功
+    int64 update_time = 4;
+    int64 id = 5;
+    string task_id = 6;
+    string download_addr = 7; // pkg下载地址, 成功
+}
+
+enum TaskStatus{
+    _ = 0;
+    unpack = 1;
+    packed = 2;
+    failed = 3;
+    success = 4;
+}
+
+// 任务
+message PackTask {
+    string task_name = 1; // 任务名称
+    string user_name = 2; // 创建人
+    string user_id = 13;
+    TaskStatus status = 3; //
+    repeated TaskMiddleWare middle_wares = 4;
+    repeated TaskMicroSrv micro_srvs = 5;
+    map<string,string> pub_params = 15; // 公共环境变量，由添加到任务的微服务决定
+    repeated TaskCert certs = 6;
+    RancherInfo rancher = 7;
+    map<string,MirrorStore> mirrors = 8;
+    repeated TaskSlb slbs = 9;
+    repeated string namespaces = 10; // 命名空间
+    string pro_name = 11; // 项目名称
+    string cluster_name = 12; // 集群名称
+    string task_id = 14;
+    string download_addr = 16; // pkg下载地址
+    repeated TaskConfigMap configMaps = 17;
+}
+
+//任务相关中间件
+message TaskMiddleWare {
+    string name = 1; // 名称
+    string version = 2;
+    map<string,string> meta = 3; // 提取的参数
+    string package = 4; // 压缩包路径
+    string type = 5; // 主备/集群/高可用
+    string marks = 6; //备注
+    int64 id = 7;
+    string task_id = 8;
+    int64 create_time = 10;
+    int64 update_time = 11;
+    int32 setted = 12; // 0 未配置，1已配置
+    int32 origin_id = 13; // 原始id
+    string parent_name = 14;
+    string deployment_type = 15; // 安装包部署类型, 单体/集群
+}
+
+// 任务所需微服务
+message TaskMicroSrv {
+    MicroService micro_service  = 1; // 自定义环境变量允许修改，公共环境变量不允许修改
+    string task_id = 2;
+    string namespace = 3; // 微服务的命名空间, 需要配置
+    int64 origin_id = 4; // 原始微服务的 id
+    int32 setted = 5; // 0: 未配置，1: 已配置
+}
+
+message GetPublicVarNameResponse {
+    repeated string name = 1;
+}
+
+// 任务的负载均衡信息
+message TaskSlb {
+    int64 id = 1;
+    string name = 2;
+    string task_id = 3;
+    string host = 4; // 主机名
+    string namespace = 5;
+    repeated RouterInfo routers = 6;
+    repeated int64 certs = 7; // 证书 id 列表
+    string user_name = 8; // 创建人
+    string user_id = 9;
+}
+
+// 路由信息
+message RouterInfo {
+    string path = 1;
+    string workload = 2;
+    string targetPort = 3;
+}
+
+// 任务配置的证书
+message TaskCert {
+    string name = 1; // 名称
+    string signer = 2; // 签发人
+    int64 expire_date = 3; // 过期时间
+    string task_id = 4;
+    int64 id = 5;
+    repeated string IP = 7;
+    repeated string host = 8; //域名
+    string private_key = 9; // 私钥
+    string content = 10; // 证书
+    int64 update_time = 11;
+    int64 origin_id = 12; // 原始id
+    string user_name = 13; // 创建人
+    string user_id = 14;
+}
+
+// 镜像仓库信息
+message MirrorStore {
+    string mirror_url = 1; // 镜像仓库地址
+    string token_name = 2; // 认证凭据名称
+    string account = 3;    // 镜像仓库账户名称
+    string passwd = 4;     // 镜像仓库账户密码
+}
+
+// 任务配置的 rancher 信息
+message RancherInfo {
+    string rancher_url = 1;  // 不自动安装 Rancher 或者自动安装 Rancher 但不自动生成参数时，需要这三个参数
+    string rancher_token = 2;
+    int32 rancher_port = 3;
+
+    bool auto_install_rancher = 4; // 是否自动安装 rancher
+    int32 http_port = 5;
+    int32 https_port = 6;
+    string rancher_host = 7;
+
+    bool auto_gen_parameter = 8; // 自动安装 Rancher 时，是否可以自动生成参数(rancher_url)
+
+    bool auto_install_kubernetes = 9; // true 时，自动安装 kubernetes, 并需要指定安装 kubernetes 所需参数
+    string kubernetes_version = 10;
+    string kubernetes_master_hosts = 11;
+    string kubernetes_work_hosts = 12;
+}
+
+message Empty {}
+
+service ConfigMapService {
+    rpc CreateConfigMap(CreateConfigMapRequest) returns (Empty); // 创建配置映射
+    rpc GetConfigMapList(GetConfigMapListRequest) returns (GetConfigMapListResponse);
+    rpc UpdateConfigMap(UpdateConfigMapRequest) returns (Empty);
+    rpc DeleteConfigMap(DeleteConfigMapRequest) returns (Empty);
+}
+
+message ConfigMap {
+    string name = 1;
+    map<string, string> data = 2;
+    string description = 3;
+    // optional
+    int64 id = 4;
+    string creator = 5;
+    string creator_id = 6;
+    int64 create_time = 7;
+    int64 update_time =8;
+}
+
+message CreateConfigMapRequest {
+    ConfigMap configMap = 1;
+    string user_id = 2;
+    string user_name = 3;
+}
+
+message GetConfigMapListRequest {
+    int32 offset = 1; // required
+    int32 limit = 2;  // required
+    string user_name = 3; // 创建人
+    string name = 4; // configMap 名称，支持模糊搜索
+    int64 id = 5;
+}
+
+message GetConfigMapListResponse {
+    repeated ConfigMap configMap = 1;
+    int32 total = 2;
+}
+
+message UpdateConfigMapRequest {
+    ConfigMap configMap = 1;
+    string user_id = 2;
+    string user_name = 3;
+}
+
+message DeleteConfigMapRequest {
+    int64 id = 1;
+    string user_id = 2;
+    string user_name = 3;
+}

@@ -1,0 +1,316 @@
+{
+    "nested": {
+        "acquisition": {
+            "options": {
+                "go_package": "whgo/infra/proto/acquisition;acquisition"
+            },
+            "nested": {
+                "DataMonitorService": {
+                    "methods": {
+                        "GetObjectList": {
+                            "requestType": "GetObjectListReq",
+                            "responseType": "GetObjectListRsp"
+                        },
+                        "GetMetricList": {
+                            "requestType": "GetMetricListReq",
+                            "responseType": "GetMetricListRsp"
+                        },
+                        "GetDataOperateList": {
+                            "requestType": "GetDataOperateListReq",
+                            "responseType": "GetDataOperateListRsp"
+                        },
+                        "GetStatisticsFunctionList": {
+                            "requestType": "GetStatisticsFunctionListReq",
+                            "responseType": "GetStatisticsFunctionListRsp"
+                        },
+                        "GetStatisticsStepList": {
+                            "requestType": "GetStatisticsStepListReq",
+                            "responseType": "GetStatisticsStepListRsp"
+                        },
+                        "GetStatisticsDataList": {
+                            "requestType": "GetStatisticsDataListReq",
+                            "responseType": "GetStatisticsDataListRsp"
+                        },
+                        "StoreStatisticsCondition": {
+                            "requestType": "StoreStatisticsConditionReq",
+                            "responseType": "StoreStatisticsConditionRsp"
+                        },
+                        "GetShareStatisticsCondition": {
+                            "requestType": "GetShareStatisticsConditionReq",
+                            "responseType": "GetShareStatisticsConditionRsp"
+                        }
+                    }
+                },
+                "GetObjectListReq": {
+                    "fields": {}
+                },
+                "GetObjectListRsp": {
+                    "fields": {
+                        "total": {
+                            "type": "int32",
+                            "id": 1
+                        },
+                        "list": {
+                            "rule": "repeated",
+                            "type": "Object",
+                            "id": 2
+                        }
+                    }
+                },
+                "Object": {
+                    "fields": {
+                        "cluster_name": {
+                            "type": "string",
+                            "id": 1
+                        },
+                        "namespace": {
+                            "type": "string",
+                            "id": 2
+                        },
+                        "service_name": {
+                            "type": "string",
+                            "id": 3
+                        }
+                    }
+                },
+                "Metric": {
+                    "fields": {
+                        "object": {
+                            "type": "Object",
+                            "id": 1
+                        },
+                        "name": {
+                            "type": "string",
+                            "id": 2
+                        },
+                        "operates": {
+                            "rule": "repeated",
+                            "type": "Operate",
+                            "id": 3
+                        }
+                    }
+                },
+                "GetMetricListReq": {
+                    "fields": {
+                        "objects": {
+                            "rule": "repeated",
+                            "type": "Object",
+                            "id": 1
+                        }
+                    }
+                },
+                "GetMetricListRsp": {
+                    "fields": {
+                        "total": {
+                            "type": "int32",
+                            "id": 1
+                        },
+                        "list": {
+                            "rule": "repeated",
+                            "type": "Metric",
+                            "id": 2
+                        }
+                    }
+                },
+                "Operate": {
+                    "fields": {
+                        "name": {
+                            "type": "string",
+                            "id": 1
+                        },
+                        "desc": {
+                            "type": "string",
+                            "id": 2
+                        },
+                        "value": {
+                            "type": "string",
+                            "id": 3
+                        }
+                    }
+                },
+                "GetDataOperateListReq": {
+                    "fields": {}
+                },
+                "GetDataOperateListRsp": {
+                    "fields": {
+                        "list": {
+                            "rule": "repeated",
+                            "type": "Operate",
+                            "id": 1
+                        }
+                    }
+                },
+                "StatisticsFunction": {
+                    "fields": {
+                        "name": {
+                            "type": "string",
+                            "id": 1
+                        },
+                        "desc": {
+                            "type": "string",
+                            "id": 2
+                        }
+                    }
+                },
+                "GetStatisticsFunctionListReq": {
+                    "fields": {}
+                },
+                "GetStatisticsFunctionListRsp": {
+                    "fields": {
+                        "total": {
+                            "type": "int32",
+                            "id": 1
+                        },
+                        "list": {
+                            "rule": "repeated",
+                            "type": "StatisticsFunction",
+                            "id": 2
+                        }
+                    }
+                },
+                "StatisticsStep": {
+                    "fields": {
+                        "name": {
+                            "type": "string",
+                            "id": 1
+                        },
+                        "desc": {
+                            "type": "string",
+                            "id": 2
+                        }
+                    }
+                },
+                "GetStatisticsStepListReq": {
+                    "fields": {}
+                },
+                "GetStatisticsStepListRsp": {
+                    "fields": {
+                        "total": {
+                            "type": "int32",
+                            "id": 1
+                        },
+                        "list": {
+                            "rule": "repeated",
+                            "type": "StatisticsStep",
+                            "id": 2
+                        }
+                    }
+                },
+                "TimeRange": {
+                    "fields": {
+                        "from": {
+                            "type": "int64",
+                            "id": 1
+                        },
+                        "to": {
+                            "type": "int64",
+                            "id": 2
+                        }
+                    }
+                },
+                "StatisticsDataCondition": {
+                    "fields": {
+                        "metrics": {
+                            "rule": "repeated",
+                            "type": "Metric",
+                            "id": 1
+                        },
+                        "functions": {
+                            "rule": "repeated",
+                            "type": "StatisticsFunction",
+                            "id": 3
+                        },
+                        "step": {
+                            "type": "StatisticsStep",
+                            "id": 4
+                        },
+                        "range": {
+                            "type": "TimeRange",
+                            "id": 5
+                        }
+                    }
+                },
+                "GetStatisticsDataListReq": {
+                    "fields": {
+                        "condition": {
+                            "type": "StatisticsDataCondition",
+                            "id": 1
+                        }
+                    }
+                },
+                "StatisticsData": {
+                    "fields": {
+                        "metric": {
+                            "type": "Metric",
+                            "id": 1
+                        },
+                        "datas": {
+                            "rule": "repeated",
+                            "type": "Data",
+                            "id": 2
+                        }
+                    },
+                    "nested": {
+                        "Data": {
+                            "fields": {
+                                "time": {
+                                    "type": "int64",
+                                    "id": 1
+                                },
+                                "value": {
+                                    "type": "float",
+                                    "id": 2
+                                }
+                            }
+                        }
+                    }
+                },
+                "GetStatisticsDataListRsp": {
+                    "fields": {
+                        "total": {
+                            "type": "int32",
+                            "id": 1
+                        },
+                        "list": {
+                            "rule": "repeated",
+                            "type": "StatisticsData",
+                            "id": 2
+                        }
+                    }
+                },
+                "StoreStatisticsConditionReq": {
+                    "fields": {
+                        "condition": {
+                            "type": "StatisticsDataCondition",
+                            "id": 1
+                        }
+                    }
+                },
+                "StoreStatisticsConditionRsp": {
+                    "fields": {
+                        "uuid": {
+                            "type": "string",
+                            "id": 1
+                        }
+                    }
+                },
+                "GetShareStatisticsConditionReq": {
+                    "fields": {
+                        "uuid": {
+                            "type": "string",
+                            "id": 1
+                        }
+                    }
+                },
+                "GetShareStatisticsConditionRsp": {
+                    "fields": {
+                        "condition": {
+                            "type": "StatisticsDataCondition",
+                            "id": 1
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
