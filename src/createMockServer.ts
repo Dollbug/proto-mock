@@ -1,6 +1,6 @@
 
 import restify, { Request, Response, Next, RequestHandlerType } from 'restify';
-import mockjs, { MockjsRandom } from 'mockjs';
+import { MockjsRandom } from 'mockjs';
 import {Options} from './index'
 type ConfigHandler = (
     req: restify.Request

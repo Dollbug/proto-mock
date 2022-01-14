@@ -1,8 +1,8 @@
 
-import restify, { Request, Response, Next, RequestHandlerType } from 'restify';
-import { upperFirst, values } from 'lodash';
+import restify, { Request, Response, Next } from 'restify';
+import { upperFirst} from 'lodash';
 import createMockServer from './createMockServer'
-import mockjs, { MockjsRandom } from 'mockjs';
+import { MockjsRandom } from 'mockjs';
 import path from 'path'
 import globby from 'globby';
 import shell from 'shelljs';
@@ -50,6 +50,7 @@ class Mock {
         return (req: Request, res: Response, next: Next) => {
             const interfaceName = req.params['*'].slice(1)
             const protoInterfaceName = upperFirst(interfaceName)
+            console.log(protoInterfaceName)
 
             next()
         }
@@ -67,7 +68,7 @@ class Mock {
                 if (key === 'methods') {
                     console.log(44, obj[key])
                 }
-                if(obj[key] instanceof Object){
+                if (obj[key] instanceof Object) {
                     dfs(obj[key])
 
                 }
@@ -116,3 +117,5 @@ const mock = new Mock({
     port: 3003, // 服务启动端口
     protoPath: '/Users/edy/Desktop/proto-mock/src/proto' // proto文件夹路径 绝对路径
 })
+
+console.log(mock)

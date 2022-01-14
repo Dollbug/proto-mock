@@ -1,9 +1,0 @@
-syntax = "proto3";
-
-message ImportTypeA {
-    string field_a = 1;
-}
-
-message ImportTypeB {
-    string field_b = 1;
-}

@@ -1,9 +1,0 @@
-syntax = "proto3";
-
-package imported_files;
-import "import.proto";
-
-message DirectType {
-    ImportTypeA field_a = 1;
-    ImportTypeB field_b = 2;
-}

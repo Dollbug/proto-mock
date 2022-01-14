@@ -1,6 +1,0 @@
-syntax = "proto3";
-
-message JustMessage {
-  string field_a = 1;
-  string field_b = 2;
-}

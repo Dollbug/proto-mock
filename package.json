@@ -20,11 +20,7 @@
       "prettier --parser=typescript --write"
     ]
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
+ 
   "bin": {
     "proto-converter": "./bin/proto-converter2"
   },
